@@ -172,19 +172,16 @@ treemap_data = df[
     ]
 ].copy()
 
-# 영화명 처리
 treemap_data["movieNm"] = (
     treemap_data["movieNm"]
     .fillna("영화명 없음")
     .astype(str)
 )
 
-# 총 관객수가 없는 데이터 제거
 treemap_data = treemap_data.dropna(
     subset=["total_audi"]
 )
 
-# 음수 관객 데이터 제거
 treemap_data = treemap_data[
     treemap_data["total_audi"] >= 0
 ]
@@ -245,10 +242,7 @@ st.write(
     "히스토그램으로 확인합니다."
 )
 
-# --------------------------------------------------
-# 히스토그램용 데이터
-# --------------------------------------------------
-
+# 히스토그램 데이터
 hist_data = df[
     ["movieNm", "total_audi"]
 ].copy()
@@ -267,13 +261,9 @@ hist_data = hist_data[
     hist_data["total_audi"] >= 0
 ]
 
-
-# --------------------------------------------------
-# 관객이 가장 많은 영화 찾기
-# --------------------------------------------------
-
 if not hist_data.empty:
 
+    # 가장 관객이 많은 영화
     max_movie_row = hist_data.loc[
         hist_data["total_audi"].idxmax()
     ]
@@ -281,12 +271,7 @@ if not hist_data.empty:
     max_movie_name = max_movie_row["movieNm"]
     max_movie_audience = int(max_movie_row["total_audi"])
 
-
-    # --------------------------------------------------
-    # 가장 영화가 많이 몰린 구간 계산
-    # --------------------------------------------------
-
-    # 10개의 동일한 구간으로 나눔
+    # 10개 구간으로 나누기
     hist_data["관객구간"] = pd.cut(
         hist_data["total_audi"],
         bins=10,
@@ -299,19 +284,13 @@ if not hist_data.empty:
         .sort_index()
     )
 
-    # 영화가 가장 많이 들어 있는 구간
     most_common_bin = bin_counts.idxmax()
     most_common_count = int(bin_counts.max())
 
-    # 구간의 시작/끝 숫자
     bin_start = most_common_bin.left
     bin_end = most_common_bin.right
 
-
-    # --------------------------------------------------
-    # Plotly 히스토그램
-    # --------------------------------------------------
-
+    # 히스토그램
     fig3 = px.histogram(
         hist_data,
         x="total_audi",
@@ -342,11 +321,7 @@ if not hist_data.empty:
         use_container_width=True
     )
 
-
-    # --------------------------------------------------
     # 자동 분석 결과
-    # --------------------------------------------------
-
     st.markdown("### 📌 히스토그램에서 확인할 수 있는 내용")
 
     st.info(
@@ -361,9 +336,111 @@ if not hist_data.empty:
         f"({max_movie_audience:,}명)"
     )
 
+# 그래프 3 설명
+st.markdown("### 💡 이 그래프로 알 수 있는 것")
+
+st.text_area(
+    "한 문장으로 적어 보세요.",
+    placeholder="이 그래프로 알 수 있는 것을 한 문장으로 적어 보세요.",
+    height=100,
+    key="graph3_knowledge"
+)
+
+
+# ==================================================
+# 그래프 4
+# ==================================================
+
+st.divider()
+
+st.header("그래프 4) 산점도 - 개봉일 스크린수가 많으면 총 관객도 많을까")
+
+st.write(
+    "개봉일 스크린수와 총 관객의 관계를 산점도로 나타냅니다. "
+    "각 점은 하나의 영화이며, 장르에 따라 색을 다르게 표시합니다."
+)
+
+# 산점도용 데이터
+scatter_data = df[
+    [
+        "movieNm",
+        "genre_first",
+        "first_scrn",
+        "total_audi"
+    ]
+].copy()
+
+# 영화명 처리
+scatter_data["movieNm"] = (
+    scatter_data["movieNm"]
+    .fillna("영화명 없음")
+    .astype(str)
+)
+
+# 숫자가 없는 행 제거
+scatter_data = scatter_data.dropna(
+    subset=[
+        "first_scrn",
+        "total_audi"
+    ]
+)
+
+# 음수 데이터 제거
+scatter_data = scatter_data[
+    (scatter_data["first_scrn"] >= 0)
+    & (scatter_data["total_audi"] >= 0)
+]
+
+# 산점도
+fig4 = px.scatter(
+    scatter_data,
+    x="first_scrn",
+    y="total_audi",
+    color="genre_first",
+    hover_name="movieNm",
+    custom_data=[
+        "movieNm",
+        "genre_first",
+        "first_scrn",
+        "total_audi"
+    ],
+    labels={
+        "first_scrn": "개봉일 스크린수",
+        "total_audi": "총 관객",
+        "genre_first": "장르"
+    },
+    title="개봉일 스크린수와 총 관객의 관계"
+)
+
+fig4.update_traces(
+    marker=dict(
+        size=10,
+        opacity=0.75
+    ),
+    hovertemplate=(
+        "<b>%{customdata[0]}</b><br>"
+        "장르: %{customdata[1]}<br>"
+        "개봉일 스크린수: %{customdata[2]:,}개<br>"
+        "총 관객: %{customdata[3]:,}명"
+        "<extra></extra>"
+    )
+)
+
+fig4.update_layout(
+    height=650,
+    xaxis_title="개봉일 스크린수",
+    yaxis_title="총 관객",
+    legend_title="장르"
+)
+
+st.plotly_chart(
+    fig4,
+    use_container_width=True
+)
+
 
 # --------------------------------------------------
-# 그래프 3 설명
+# 그래프 4 - 알 수 있는 것
 # --------------------------------------------------
 
 st.markdown("### 💡 이 그래프로 알 수 있는 것")
@@ -372,7 +449,7 @@ st.text_area(
     "한 문장으로 적어 보세요.",
     placeholder="이 그래프로 알 수 있는 것을 한 문장으로 적어 보세요.",
     height=100,
-    key="graph3_knowledge"
+    key="graph4_knowledge"
 )
 
 
