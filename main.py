@@ -99,7 +99,6 @@ st.write(
     "첫 번째 장르만 사용했습니다."
 )
 
-# 장르별 영화 편수
 genre_count = (
     df["genre_first"]
     .value_counts()
@@ -111,7 +110,6 @@ genre_count.columns = [
     "영화편수"
 ]
 
-# 도넛 그래프
 fig1 = px.pie(
     genre_count,
     names="장르",
@@ -139,7 +137,6 @@ st.plotly_chart(
     use_container_width=True
 )
 
-# 그래프 1 설명
 st.markdown("### 💡 이 그래프로 알 수 있는 것")
 
 st.text_area(
@@ -163,7 +160,6 @@ st.write(
     "칸의 크기를 총 관객 수에 비례하여 나타냅니다."
 )
 
-# 트리맵용 데이터
 treemap_data = df[
     [
         "genre_first",
@@ -186,7 +182,6 @@ treemap_data = treemap_data[
     treemap_data["total_audi"] >= 0
 ]
 
-# 트리맵
 fig2 = px.treemap(
     treemap_data,
     path=["genre_first", "movieNm"],
@@ -218,7 +213,6 @@ st.plotly_chart(
     use_container_width=True
 )
 
-# 그래프 2 설명
 st.markdown("### 💡 이 그래프로 알 수 있는 것")
 
 st.text_area(
@@ -242,7 +236,6 @@ st.write(
     "히스토그램으로 확인합니다."
 )
 
-# 히스토그램 데이터
 hist_data = df[
     ["movieNm", "total_audi"]
 ].copy()
@@ -263,7 +256,6 @@ hist_data = hist_data[
 
 if not hist_data.empty:
 
-    # 가장 관객이 많은 영화
     max_movie_row = hist_data.loc[
         hist_data["total_audi"].idxmax()
     ]
@@ -271,7 +263,6 @@ if not hist_data.empty:
     max_movie_name = max_movie_row["movieNm"]
     max_movie_audience = int(max_movie_row["total_audi"])
 
-    # 10개 구간으로 나누기
     hist_data["관객구간"] = pd.cut(
         hist_data["total_audi"],
         bins=10,
@@ -290,7 +281,6 @@ if not hist_data.empty:
     bin_start = most_common_bin.left
     bin_end = most_common_bin.right
 
-    # 히스토그램
     fig3 = px.histogram(
         hist_data,
         x="total_audi",
@@ -321,7 +311,6 @@ if not hist_data.empty:
         use_container_width=True
     )
 
-    # 자동 분석 결과
     st.markdown("### 📌 히스토그램에서 확인할 수 있는 내용")
 
     st.info(
@@ -336,7 +325,6 @@ if not hist_data.empty:
         f"({max_movie_audience:,}명)"
     )
 
-# 그래프 3 설명
 st.markdown("### 💡 이 그래프로 알 수 있는 것")
 
 st.text_area(
@@ -360,7 +348,6 @@ st.write(
     "각 점은 하나의 영화이며, 장르에 따라 색을 다르게 표시합니다."
 )
 
-# 산점도용 데이터
 scatter_data = df[
     [
         "movieNm",
@@ -370,14 +357,12 @@ scatter_data = df[
     ]
 ].copy()
 
-# 영화명 처리
 scatter_data["movieNm"] = (
     scatter_data["movieNm"]
     .fillna("영화명 없음")
     .astype(str)
 )
 
-# 숫자가 없는 행 제거
 scatter_data = scatter_data.dropna(
     subset=[
         "first_scrn",
@@ -385,13 +370,11 @@ scatter_data = scatter_data.dropna(
     ]
 )
 
-# 음수 데이터 제거
 scatter_data = scatter_data[
     (scatter_data["first_scrn"] >= 0)
     & (scatter_data["total_audi"] >= 0)
 ]
 
-# 산점도
 fig4 = px.scatter(
     scatter_data,
     x="first_scrn",
@@ -438,9 +421,123 @@ st.plotly_chart(
     use_container_width=True
 )
 
+st.markdown("### 💡 이 그래프로 알 수 있는 것")
+
+st.text_area(
+    "한 문장으로 적어 보세요.",
+    placeholder="이 그래프로 알 수 있는 것을 한 문장으로 적어 보세요.",
+    height=100,
+    key="graph4_knowledge"
+)
+
+
+# ==================================================
+# 그래프 5
+# ==================================================
+
+st.divider()
+
+st.header("그래프 5) 상자 그림 - 장르별 총 관객 분포는 어떻게 다른가")
+
+st.write(
+    "영화가 10편 이상인 장르만 골라 "
+    "장르별 총 관객 수의 분포를 상자 그림으로 비교합니다."
+)
 
 # --------------------------------------------------
-# 그래프 4 - 알 수 있는 것
+# 장르별 영화 수 계산
+# --------------------------------------------------
+
+genre_counts_for_box = (
+    df["genre_first"]
+    .value_counts()
+)
+
+# 영화가 10편 이상인 장르만 선택
+valid_genres = genre_counts_for_box[
+    genre_counts_for_box >= 10
+].index.tolist()
+
+box_data = df[
+    df["genre_first"].isin(valid_genres)
+].copy()
+
+box_data = box_data[
+    [
+        "genre_first",
+        "movieNm",
+        "total_audi"
+    ]
+].dropna(
+    subset=["total_audi"]
+)
+
+box_data = box_data[
+    box_data["total_audi"] >= 0
+]
+
+# --------------------------------------------------
+# 박스플롯
+# --------------------------------------------------
+
+if not box_data.empty:
+
+    fig5 = px.box(
+        box_data,
+        x="genre_first",
+        y="total_audi",
+        color="genre_first",
+        points="outliers",
+        custom_data=[
+            "movieNm",
+            "genre_first",
+            "total_audi"
+        ],
+        labels={
+            "genre_first": "장르",
+            "total_audi": "총 관객"
+        },
+        title="영화 10편 이상인 장르의 총 관객 분포"
+    )
+
+    # 이상치에 마우스를 올렸을 때 영화명 표시
+    fig5.update_traces(
+        hovertemplate=(
+            "<b>%{customdata[0]}</b><br>"
+            "장르: %{customdata[1]}<br>"
+            "총 관객: %{customdata[2]:,}명"
+            "<extra></extra>"
+        )
+    )
+
+    fig5.update_layout(
+        height=650,
+        xaxis_title="장르",
+        yaxis_title="총 관객",
+        showlegend=False
+    )
+
+    st.plotly_chart(
+        fig5,
+        use_container_width=True
+    )
+
+    st.caption(
+        "※ 상자 밖에 표시되는 점은 해당 장르의 일반적인 분포에서 "
+        "상대적으로 멀리 떨어진 값(이상치)입니다. "
+        "점에 마우스를 올리면 영화명을 확인할 수 있습니다."
+    )
+
+else:
+
+    st.warning(
+        "영화가 10편 이상인 장르가 없어 "
+        "상자 그림을 그릴 수 없습니다."
+    )
+
+
+# --------------------------------------------------
+# 그래프 5 설명
 # --------------------------------------------------
 
 st.markdown("### 💡 이 그래프로 알 수 있는 것")
@@ -449,7 +546,7 @@ st.text_area(
     "한 문장으로 적어 보세요.",
     placeholder="이 그래프로 알 수 있는 것을 한 문장으로 적어 보세요.",
     height=100,
-    key="graph4_knowledge"
+    key="graph5_knowledge"
 )
 
 
