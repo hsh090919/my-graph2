@@ -311,7 +311,9 @@ if not hist_data.empty:
         use_container_width=True
     )
 
-    st.markdown("### 📌 히스토그램에서 확인할 수 있는 내용")
+    st.markdown(
+        "### 📌 히스토그램에서 확인할 수 있는 내용"
+    )
 
     st.info(
         f"🎬 **대부분의 영화가 몰려 있는 구간:** "
@@ -341,7 +343,9 @@ st.text_area(
 
 st.divider()
 
-st.header("그래프 4) 산점도 - 개봉일 스크린수가 많으면 총 관객도 많을까")
+st.header(
+    "그래프 4) 산점도 - 개봉일 스크린수가 많으면 총 관객도 많을까"
+)
 
 st.write(
     "개봉일 스크린수와 총 관객의 관계를 산점도로 나타냅니다. "
@@ -375,51 +379,59 @@ scatter_data = scatter_data[
     & (scatter_data["total_audi"] >= 0)
 ]
 
-fig4 = px.scatter(
-    scatter_data,
-    x="first_scrn",
-    y="total_audi",
-    color="genre_first",
-    hover_name="movieNm",
-    custom_data=[
-        "movieNm",
-        "genre_first",
-        "first_scrn",
-        "total_audi"
-    ],
-    labels={
-        "first_scrn": "개봉일 스크린수",
-        "total_audi": "총 관객",
-        "genre_first": "장르"
-    },
-    title="개봉일 스크린수와 총 관객의 관계"
-)
+if not scatter_data.empty:
 
-fig4.update_traces(
-    marker=dict(
-        size=10,
-        opacity=0.75
-    ),
-    hovertemplate=(
-        "<b>%{customdata[0]}</b><br>"
-        "장르: %{customdata[1]}<br>"
-        "개봉일 스크린수: %{customdata[2]:,}개<br>"
-        "총 관객: %{customdata[3]:,}명"
-        "<extra></extra>"
+    fig4 = px.scatter(
+        scatter_data,
+        x="first_scrn",
+        y="total_audi",
+        color="genre_first",
+        hover_name="movieNm",
+        custom_data=[
+            "movieNm",
+            "genre_first",
+            "first_scrn",
+            "total_audi"
+        ],
+        labels={
+            "first_scrn": "개봉일 스크린수",
+            "total_audi": "총 관객",
+            "genre_first": "장르"
+        },
+        title="개봉일 스크린수와 총 관객의 관계"
     )
-)
 
-fig4.update_layout(
-    height=650,
-    xaxis_title="개봉일 스크린수",
-    yaxis_title="총 관객",
-    legend_title="장르"
-)
+    fig4.update_traces(
+        marker=dict(
+            size=10,
+            opacity=0.75
+        ),
+        hovertemplate=(
+            "<b>%{customdata[0]}</b><br>"
+            "장르: %{customdata[1]}<br>"
+            "개봉일 스크린수: %{customdata[2]:,}개<br>"
+            "총 관객: %{customdata[3]:,}명"
+            "<extra></extra>"
+        )
+    )
 
-st.plotly_chart(
-    fig4,
-    use_container_width=True
-)
+    fig4.update_layout(
+        height=650,
+        xaxis_title="개봉일 스크린수",
+        yaxis_title="총 관객",
+        legend_title="장르"
+    )
+
+    st.plotly_chart(
+        fig4,
+        use_container_width=True
+    )
+
+else:
+
+    st.warning(
+        "산점도를 그릴 수 있는 데이터가 없습니다."
+    )
 
 st.markdown("### 💡 이 그래프로 알 수 있는 것")
 
@@ -437,7 +449,9 @@ st.text_area(
 
 st.divider()
 
-st.header("그래프 5) 상자 그림 - 장르별 총 관객 분포는 어떻게 다른가")
+st.header(
+    "그래프 5) 상자 그림 - 장르별 총 관객 분포는 어떻게 다른가"
+)
 
 st.write(
     "영화가 10편 이상인 장르만 골라 "
@@ -541,7 +555,9 @@ st.text_area(
 
 st.divider()
 
-st.header("그래프 6) 버블 - 첫 주 관객까지 함께 보면 어떨까")
+st.header(
+    "그래프 6) 버블 - 첫 주 관객까지 함께 보면 어떨까"
+)
 
 st.write(
     "개봉일 스크린수와 총 관객의 관계를 나타낸 산점도에 "
@@ -656,7 +672,9 @@ st.text_area(
 
 st.divider()
 
-st.header("그래프 7) 선버스트 - 제작 국가에서 장르로 내려가면 어떻게 나뉠까")
+st.header(
+    "그래프 7) 선버스트 - 제작 국가에서 장르로 내려가면 어떻게 나뉠까"
+)
 
 st.write(
     "제작 국가에서 장르로 내려가는 구조를 선버스트 그래프로 나타냅니다. "
@@ -764,11 +782,6 @@ else:
         "선버스트 그래프를 그릴 수 있는 데이터가 없습니다."
     )
 
-
-# --------------------------------------------------
-# 그래프 7 설명
-# --------------------------------------------------
-
 st.markdown("### 💡 이 그래프로 알 수 있는 것")
 
 st.text_area(
@@ -776,6 +789,109 @@ st.text_area(
     placeholder="이 그래프로 알 수 있는 것을 한 문장으로 적어 보세요.",
     height=100,
     key="graph7_knowledge"
+)
+
+
+# ==================================================
+# 그래프 8
+# ==================================================
+
+st.divider()
+
+st.header(
+    "그래프 8) 산점도 - 10위권에 오래 머문 영화는 총 관객도 많은가"
+)
+
+st.write(
+    "10위권에 머문 날수와 총 관객의 관계를 산점도로 나타냅니다. "
+    "각 점은 하나의 영화입니다."
+)
+
+scatter8_data = df[
+    [
+        "movieNm",
+        "days_in_top10",
+        "total_audi"
+    ]
+].copy()
+
+# 영화명 처리
+scatter8_data["movieNm"] = (
+    scatter8_data["movieNm"]
+    .fillna("영화명 없음")
+    .astype(str)
+)
+
+# 필요한 데이터가 없는 행 제거
+scatter8_data = scatter8_data.dropna(
+    subset=[
+        "days_in_top10",
+        "total_audi"
+    ]
+)
+
+# 음수 데이터 제외
+scatter8_data = scatter8_data[
+    (scatter8_data["days_in_top10"] >= 0)
+    & (scatter8_data["total_audi"] >= 0)
+]
+
+if not scatter8_data.empty:
+
+    fig8 = px.scatter(
+        scatter8_data,
+        x="days_in_top10",
+        y="total_audi",
+        hover_name="movieNm",
+        custom_data=[
+            "movieNm",
+            "days_in_top10",
+            "total_audi"
+        ],
+        labels={
+            "days_in_top10": "10위권에 머문 날수",
+            "total_audi": "총 관객"
+        },
+        title="10위권에 오래 머문 영화는 총 관객도 많은가"
+    )
+
+    fig8.update_traces(
+        marker=dict(
+            size=10,
+            opacity=0.75
+        ),
+        hovertemplate=(
+            "<b>%{customdata[0]}</b><br>"
+            "10위권에 머문 날수: %{customdata[1]:,}일<br>"
+            "총 관객: %{customdata[2]:,}명"
+            "<extra></extra>"
+        )
+    )
+
+    fig8.update_layout(
+        height=650,
+        xaxis_title="10위권에 머문 날수",
+        yaxis_title="총 관객"
+    )
+
+    st.plotly_chart(
+        fig8,
+        use_container_width=True
+    )
+
+else:
+
+    st.warning(
+        "산점도를 그릴 수 있는 데이터가 없습니다."
+    )
+
+st.markdown("### 💡 이 그래프로 알 수 있는 것")
+
+st.text_area(
+    "한 문장으로 적어 보세요.",
+    placeholder="이 그래프로 알 수 있는 것을 한 문장으로 적어 보세요.",
+    height=100,
+    key="graph8_knowledge"
 )
 
 
